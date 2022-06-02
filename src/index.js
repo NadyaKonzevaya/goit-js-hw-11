@@ -1,13 +1,13 @@
 import './sass/main.scss';
 
-// Список параметров строки запроса которые тебе обязательно необходимо указать:
+// +1. Список параметров строки запроса которые тебе обязательно необходимо указать:
 // key - твой уникальный ключ доступа к API.
 // q - термин для поиска. То, что будет вводить пользователь.
 // image_type - тип изображения. Мы хотим только фотографии, поэтому задай значение photo.
 // orientation - ориентация фотографии. Задай значение horizontal.
 // safesearch - фильтр по возрасту. Задай значение true.
 
-// В ответе будет массив изображений удовлетворивших критериям параметров запроса.
+// +2. В ответе будет массив изображений удовлетворивших критериям параметров запроса.
 // Каждое изображение описывается объектом, из которого тебе интересны только следующие свойства:
 // webformatURL - ссылка на маленькое изображение для списка карточек.
 // largeImageURL - ссылка на большое изображение.
@@ -16,45 +16,106 @@ import './sass/main.scss';
 // views - количество просмотров.
 // comments - количество комментариев.
 // downloads - количество загрузок.
-// Если бэкенд возвращает пустой массив, значит ничего подходящего найдено небыло.
+// +3. Если бэкенд возвращает пустой массив, значит ничего подходящего найдено небыло.
 // В таком случае показывай уведомление с текстом "Sorry, there are no images matching your search query. Please try again."
 // Для уведомлений используй библиотеку notiflix.
 
+// +4. Элемент div.gallery изначально есть в HTML документе, и в него необходимо рендерить разметку карточек изображений.
+// При поиске по новому ключевому слову необходимо полностью очищать содержимое галереи, чтобы не смешивать результаты.
+
+//  Пагинация
+// Pixabay API поддерживает пагинацию и предоставляет параметры page и per_page.
+// +5. Сделай так, чтобы в каждом ответе приходило 40 объектов(по умолчанию 20).
+
+// +6. Изначально значение параметра page должно быть 1.
+// При каждом последующем запросе, его необходимо увеличить на 1.
+// +7. При поиске по новому ключевому слову значение page надо вернуть в исходное,
+// так как будет пагинация по новой коллекции изображений.
+
+// +8. В HTML документе уже есть разметка кнопки при клике по которой 
+// необходимо выполнять запрос за следующей группой изображений и добавлять разметку к уже существующим элементам галереи.
+{/* <button type="button" class="load-more">Load more</button>
+Изначально кнопка должна быть скрыта. */}
+// После первого запроса кнопка появляется в интерфейсе под галереей.
+// При повторном сабмите формы кнопка сначала прячется, а после запроса опять отображается.
+// +9. В ответе бэкенд возвращает свойство totalHits - общее количество изображений
+// которые подошли под критерий поиска(для бесплатного аккаунта).Если пользователь дошел до конца коллекции,
+//  пряч кнопку и выводи уведомление с текстом "We're sorry, but you've reached the end of search results.".
+// +10. Уведомление
+// После первого запроса при каждом новом поиске выводить уведомление в котором будет написано сколько всего нашли изображений(свойство totalHits).
+// Текст уведомления "Hooray! We found totalHits images."
+
+// +11. Библиотека SimpleLightbox
+// Добавить отображение большой версии изображения с библиотекой SimpleLightbox для полноценной галереи.
+
+// +В разметке необходимо будет обернуть каждую карточку изображения в ссылку, как указано в документации.
+// У библиотеки есть метод refresh() который обязательно нужно вызывать каждый раз после добавления
+//  новой группы карточек изображений.
+// Для того чтобы подключить CSS код библиотеки в проект,
+//  необходимо добавить еще один импорт, кроме того который описан в документации.
+// // Описан в документации
+// import SimpleLightbox from 'simplelightbox';
+// // Дополнительный импорт стилей
+// import 'simplelightbox/dist/simple-lightbox.min.css';
+
+// 12. Прокрутка страницы
+// Сделать плавную прокрутку страницы после запроса и отрисовки каждой следующей группы изображений. 
+// Вот тебе код подсказка, а разберись в нём самостоятельно.
+
+// const { height: cardHeight } = document
+//   .querySelector('.gallery')
+//   .firstElementChild.getBoundingClientRect();
+
+// window.scrollBy({
+//   top: cardHeight * 2,
+//   behavior: 'smooth',
+// });
+
 const Handlebars = require("handlebars");
 import imageCardsTpl from "./templates/image-cards.hbs";
-import { fetchImages } from './fetchImages';
 import Notiflix from 'notiflix';
+import ApiService from './api-service';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const refs = {
     form: document.querySelector(".search-form"),
     input: document.querySelector("input"),
-    btn: document.querySelector("button"),
+    // btn: document.querySelector("button"),
     gallery: document.querySelector(".gallery"),
+    loadMoreBtn: document.querySelector(".load-more"),
 };
 
-refs.form.addEventListener("submit", onFormSubmit);
+const apiService = new ApiService();
+let gallery = new SimpleLightbox('.gallery a');
 
+
+
+refs.form.addEventListener("submit", onFormSubmit);
+refs.loadMoreBtn.addEventListener("click", onLoadMoreBtnClick)
 
 function onFormSubmit(event) {
     event.preventDefault();
     clearMarkup();
-    let querySearch = event.currentTarget.elements.searchQuery.value.trim();
-
-    fetchImages(querySearch).then(value => {
+    apiService.querySearch = event.currentTarget.elements.searchQuery.value.trim();
+    if (apiService.querySearch === "") {
+        return Notiflix.Notify.warning ("Insert query word, please");
+    }
+    apiService.resetPage();
+    apiService.fetchImages().then(value => {
         if (value.hits.length === 0) {
             Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
-            console.log(value)
         } else {
-            renderImageCards(value);
-            console.log(value.hits)
-            console.log(value.hits.lenght)
+            Notiflix.Notify.info(`Hooray! We found ${value.totalHits} images.`);
+            renderImageCards(value.hits);
+            gallery.refresh();
+            refs.loadMoreBtn.classList.remove("hidden");
         }
     }).catch(onFetchError);
 }
 
 function renderImageCards(images) {
-    const markup = imageCardsTpl(images);
-    refs.gallery.innerHTML = markup;
+    refs.gallery.insertAdjacentHTML("beforeend", imageCardsTpl(images))
 }
 
 function onFetchError(error) {
@@ -64,3 +125,16 @@ function onFetchError(error) {
 function clearMarkup() { 
     refs.gallery.innerHTML = "";
 }
+
+function onLoadMoreBtnClick() {
+    apiService.fetchImages().then(value => {
+        renderImageCards(value.hits);
+        gallery.refresh();
+        refs.loadMoreBtn.classList.add("hidden");
+        if (value.hits.length < 40) {
+            return  Notiflix.Notify.failure("We're sorry, but you've reached the end of search results.");
+        }
+        refs.loadMoreBtn.classList.remove("hidden");
+    }).catch(onFetchError);
+}
+
