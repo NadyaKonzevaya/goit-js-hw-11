@@ -16,9 +16,7 @@ img {
     width: 1200px;
 }
 
-.hidden {
-    display: none;
-}
+
 
 .search-form {
     display: flex;
@@ -113,5 +111,22 @@ img {
     font-size: 12px;
 }
 
+.load-more {
+    display: block;
+    background-color: darkblue;
+    color: white;
+    border-radius: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
 
 

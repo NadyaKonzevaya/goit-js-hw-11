@@ -88,11 +88,13 @@ const refs = {
 
 const apiService = new ApiService();
 let gallery = new SimpleLightbox('.gallery a');
+const throttle = require('lodash.throttle');
 
 
 
 refs.form.addEventListener("submit", onFormSubmit);
-refs.loadMoreBtn.addEventListener("click", onLoadMoreBtnClick)
+refs.loadMoreBtn.addEventListener("click", onLoadMoreBtnClick);
+// window.addEventListener("scroll", throttle(scrollBy, 500));
 
 function onFormSubmit(event) {
     event.preventDefault();
@@ -108,6 +110,8 @@ function onFormSubmit(event) {
         } else {
             Notiflix.Notify.info(`Hooray! We found ${value.totalHits} images.`);
             renderImageCards(value.hits);
+            window.addEventListener("scroll", throttle(scrollBy, 1000));
+            // scrollBy();
             gallery.refresh();
             refs.loadMoreBtn.classList.remove("hidden");
         }
@@ -129,6 +133,7 @@ function clearMarkup() {
 function onLoadMoreBtnClick() {
     apiService.fetchImages().then(value => {
         renderImageCards(value.hits);
+        // scrollBy();
         gallery.refresh();
         refs.loadMoreBtn.classList.add("hidden");
         if (value.hits.length < 40) {
@@ -138,3 +143,11 @@ function onLoadMoreBtnClick() {
     }).catch(onFetchError);
 }
 
+function scrollBy() {
+    const { height: cardHeight } = refs.gallery.firstElementChild.getBoundingClientRect();
+
+    window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+    });
+}
