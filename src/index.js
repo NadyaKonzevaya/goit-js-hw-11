@@ -77,7 +77,7 @@ import Notiflix from 'notiflix';
 import ApiService from './api-service';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-// import axios from "axios";
+
 
 
 const refs = {
@@ -86,26 +86,12 @@ const refs = {
     gallery: document.querySelector(".gallery"),
     loadMoreBtn: document.querySelector(".load-more"),
 };
-// let timerID;
-// let isPaused = false;
 
 const apiService = new ApiService();
 let gallery = new SimpleLightbox('.gallery a');
-// const throttle = require('lodash.throttle');
-// let infScroll = new InfiniteScroll( '.container', {
-//     path: function() {
-//         let pageNumber = ( this.loadCount + 1 ) * 10;
-//         return `/articles/P${pageNumber}`;
-//     },
-//     append: '.post',
-//     history: false,
-// });
 
 refs.form.addEventListener("submit", onFormSubmit);
 refs.loadMoreBtn.addEventListener("click", onLoadMoreBtnClick);
-// refs.gallery.addEventListener("click", stopScroll);
-
-
 
 function onFormSubmit(event) {
     event.preventDefault();
