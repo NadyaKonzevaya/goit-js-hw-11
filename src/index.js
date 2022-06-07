@@ -102,17 +102,9 @@ let gallery = new SimpleLightbox('.gallery a');
 
 refs.form.addEventListener("submit", onFormSubmit);
 refs.loadMoreBtn.addEventListener("click", onLoadMoreBtnClick);
+refs.gallery.addEventListener("click", stopScroll);
 
-// это бесконечный скролл
-window.addEventListener("scroll", () => {
-    // document.documentElement - Это весь html,а getBoundingClientRect() - выводит координаты, 
-    // bottom показывает нижние координаты 
-    const documentRect = document.documentElement.getBoundingClientRect();
-    // document.documentElement.clientHeight - высота окна + 150px? что бы не ждать самого конца
-    if (documentRect.bottom < document.documentElement.clientHeight + 150) {
-        onLoadMoreBtnClick();
-    }
-});
+
 
 function onFormSubmit(event) {
     event.preventDefault();
@@ -139,11 +131,21 @@ function onFormSubmit(event) {
             //     }, 1000);   
             // });
             // }, 3000); 
-    
+        
             setTimeout(() =>
-                setInterval(() =>  smoothScroll(), 100), 2000);
-            
+                setInterval(() => smoothScroll(), 100), 2000);
+        
             gallery.refresh();
+            // это бесконечный скролл
+            window.addEventListener("scroll", () => {
+                // document.documentElement - Это весь html,а getBoundingClientRect() - выводит координаты, 
+                // bottom показывает нижние координаты 
+                const documentRect = document.documentElement.getBoundingClientRect();
+                // document.documentElement.clientHeight - высота окна + 150px? что бы не ждать самого конца
+                if (documentRect.bottom < document.documentElement.clientHeight + 150) {
+                    onLoadMoreBtnClick();
+                }
+            });
             refs.loadMoreBtn.classList.remove("hidden");
         }
     })
@@ -168,8 +170,8 @@ function onLoadMoreBtnClick() {
         renderImageCards(value.hits);
 
         setTimeout(() =>
-            setInterval(() =>  smoothScroll(), 100), 2000);
-
+            setInterval(() => smoothScroll(), 100), 2000);
+        
         gallery.refresh();
         refs.loadMoreBtn.classList.add("hidden");
         if (value.hits.length < 40) {
@@ -185,18 +187,9 @@ function smoothScroll() {
                 .firstElementChild.getBoundingClientRect();
 
     window.scrollBy({
-        top: cardHeight * 2,
+        top: cardHeight * 0.05,
         behavior: 'smooth',
     });    
-
-        // const { height: cardHeight } = refs.gallery.firstElementChild.getBoundingClientRect();
-        // window.scrollBy({
-        //     top: cardHeight * 2,
-        //     behavior: 'smooth',
-        // })
-    
-    
-    
     // window.addEventListener("click", clearInterval(intervalID));
     // setInterval(() => {
     //     if (!isPaused) {
@@ -206,4 +199,7 @@ function smoothScroll() {
     //         })
     //     }
     // }, 1000)
-}
+};
+
+
+
