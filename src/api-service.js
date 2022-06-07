@@ -21,10 +21,10 @@ export default class ApiService {
         });
         return await axios.get(`${BASE_URL}/?${searchParams}`)
         .then(response => {
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(response.status);
             }
-            return response.json();
+            return response.data;
         }).then(({hits, totalHits}) => { 
             this.incrementPage();
             return {hits, totalHits};
