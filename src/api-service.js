@@ -1,5 +1,6 @@
 const API_KEY = "27639427-70597f5ebc7133bee1f081188";
 const BASE_URL = "https://pixabay.com/api";
+const axios = require('axios').default;
 
 
 export default class ApiService {
@@ -8,7 +9,7 @@ export default class ApiService {
         this.page = 1;
     }
 
-    fetchImages() {
+    async fetchImages() {
         const searchParams = new URLSearchParams({
             key: API_KEY,
             q: this.querySearch,
@@ -18,7 +19,7 @@ export default class ApiService {
             per_page: 40,
             page: this.page,
         });
-        return fetch(`${BASE_URL}/?${searchParams}`)
+        return await axios.get(`${BASE_URL}/?${searchParams}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(response.status);

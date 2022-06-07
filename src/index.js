@@ -77,7 +77,8 @@ import Notiflix from 'notiflix';
 import ApiService from './api-service';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-// import InfiniteScroll from "infinite-scroll";
+// import axios from "axios";
+
 
 const refs = {
     form: document.querySelector(".search-form"),
@@ -102,7 +103,7 @@ let gallery = new SimpleLightbox('.gallery a');
 
 refs.form.addEventListener("submit", onFormSubmit);
 refs.loadMoreBtn.addEventListener("click", onLoadMoreBtnClick);
-refs.gallery.addEventListener("click", stopScroll);
+// refs.gallery.addEventListener("click", stopScroll);
 
 
 
@@ -157,7 +158,7 @@ function renderImageCards(images) {
 }
 
 function onFetchError(error) {
-    console.log(error.message);
+    console.log(error);
 }
 
 function clearMarkup() { 
