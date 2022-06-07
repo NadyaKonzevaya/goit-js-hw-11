@@ -85,7 +85,7 @@ const refs = {
     gallery: document.querySelector(".gallery"),
     loadMoreBtn: document.querySelector(".load-more"),
 };
-let intervalID;
+// let timerID;
 // let isPaused = false;
 
 const apiService = new ApiService();
@@ -102,7 +102,7 @@ let gallery = new SimpleLightbox('.gallery a');
 
 refs.form.addEventListener("submit", onFormSubmit);
 refs.loadMoreBtn.addEventListener("click", onLoadMoreBtnClick);
-refs.gallery.addEventListener("click", clearInterval(intervalID))
+// refs.gallery.addEventListener("click", clearInterval(intervalID))
 // window.addEventListener("scroll", throttle(scrollBy, 500));
 
 function onFormSubmit(event) {
@@ -130,10 +130,10 @@ function onFormSubmit(event) {
             //     }, 1000);   
             // });
             // }, 3000); 
-
+    
             setTimeout(() =>
-                setInterval(() => scrollBy(), 100), 2000);
-         
+                setInterval(() =>  smoothScroll(), 100), 2000);
+            
             gallery.refresh();
             refs.loadMoreBtn.classList.remove("hidden");
         }
@@ -157,8 +157,10 @@ function clearMarkup() {
 function onLoadMoreBtnClick() {
     apiService.fetchImages().then(value => {
         renderImageCards(value.hits);
+
         setTimeout(() =>
-                setInterval(() => scrollBy(), 100), 2000);
+            setInterval(() =>  smoothScroll(), 100), 2000);
+
         gallery.refresh();
         refs.loadMoreBtn.classList.add("hidden");
         if (value.hits.length < 40) {
@@ -168,12 +170,24 @@ function onLoadMoreBtnClick() {
     }).catch(onFetchError);
 }
 
-function scrollBy() {
-        const { height: cardHeight } = refs.gallery.firstElementChild.getBoundingClientRect();
-        window.scrollBy({
-            top: cardHeight * 2,
-            behavior: 'smooth',
-        })
+function smoothScroll() {
+    const { height: cardHeight } = document
+                .querySelector('.gallery')
+                .firstElementChild.getBoundingClientRect();
+
+    window.scrollBy({
+        top: cardHeight * 2,
+        behavior: 'smooth',
+    });    
+
+        // const { height: cardHeight } = refs.gallery.firstElementChild.getBoundingClientRect();
+        // window.scrollBy({
+        //     top: cardHeight * 2,
+        //     behavior: 'smooth',
+        // })
+    
+    
+    
     // window.addEventListener("click", clearInterval(intervalID));
     // setInterval(() => {
     //     if (!isPaused) {
