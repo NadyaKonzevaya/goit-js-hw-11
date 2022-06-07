@@ -20,6 +20,9 @@ img {
 
 .search-form {
     display: flex;
+    position: fixed;
+    top: 0;
+    width: 100%;
     margin-bottom: 15px;
 
     justify-content: center;
@@ -60,6 +63,7 @@ img {
     flex-wrap: wrap;
     margin: -15px;
     justify-content: space-around;
+    padding-top: 75px;
 
     // width: 1280px;
     // margin-left: auto;

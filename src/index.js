@@ -77,23 +77,32 @@ import Notiflix from 'notiflix';
 import ApiService from './api-service';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+// import InfiniteScroll from "infinite-scroll";
 
 const refs = {
     form: document.querySelector(".search-form"),
     input: document.querySelector("input"),
-    // btn: document.querySelector("button"),
     gallery: document.querySelector(".gallery"),
     loadMoreBtn: document.querySelector(".load-more"),
 };
+let intervalID;
+// let isPaused = false;
 
 const apiService = new ApiService();
 let gallery = new SimpleLightbox('.gallery a');
-const throttle = require('lodash.throttle');
-
-
+// const throttle = require('lodash.throttle');
+// let infScroll = new InfiniteScroll( '.container', {
+//     path: function() {
+//         let pageNumber = ( this.loadCount + 1 ) * 10;
+//         return `/articles/P${pageNumber}`;
+//     },
+//     append: '.post',
+//     history: false,
+// });
 
 refs.form.addEventListener("submit", onFormSubmit);
 refs.loadMoreBtn.addEventListener("click", onLoadMoreBtnClick);
+refs.gallery.addEventListener("click", clearInterval(intervalID))
 // window.addEventListener("scroll", throttle(scrollBy, 500));
 
 function onFormSubmit(event) {
@@ -110,12 +119,26 @@ function onFormSubmit(event) {
         } else {
             Notiflix.Notify.info(`Hooray! We found ${value.totalHits} images.`);
             renderImageCards(value.hits);
-            window.addEventListener("scroll", throttle(scrollBy, 1000));
-            // scrollBy();
+            // setTimeout(() => {
+            //     const scrollInt = setInterval(scrollBy, 100)
+            // isPaused = false;
+            // window.addEventListener("scroll", () => {
+            //     isPaused = true;
+            //     // clearTimeout(timer);
+            //     timer = window.setTimeout(() => {
+            //         isPaused = false;
+            //     }, 1000);   
+            // });
+            // }, 3000); 
+
+            setTimeout(() =>
+                setInterval(() => scrollBy(), 100), 2000);
+         
             gallery.refresh();
             refs.loadMoreBtn.classList.remove("hidden");
         }
-    }).catch(onFetchError);
+    })
+    .catch(onFetchError);
 }
 
 function renderImageCards(images) {
@@ -128,12 +151,14 @@ function onFetchError(error) {
 
 function clearMarkup() { 
     refs.gallery.innerHTML = "";
+    refs.loadMoreBtn.classList.add("hidden");
 }
 
 function onLoadMoreBtnClick() {
     apiService.fetchImages().then(value => {
         renderImageCards(value.hits);
-        // scrollBy();
+        setTimeout(() =>
+                setInterval(() => scrollBy(), 100), 2000);
         gallery.refresh();
         refs.loadMoreBtn.classList.add("hidden");
         if (value.hits.length < 40) {
@@ -144,10 +169,18 @@ function onLoadMoreBtnClick() {
 }
 
 function scrollBy() {
-    const { height: cardHeight } = refs.gallery.firstElementChild.getBoundingClientRect();
-
-    window.scrollBy({
-    top: cardHeight * 2,
-    behavior: 'smooth',
-    });
+        const { height: cardHeight } = refs.gallery.firstElementChild.getBoundingClientRect();
+        window.scrollBy({
+            top: cardHeight * 2,
+            behavior: 'smooth',
+        })
+    // window.addEventListener("click", clearInterval(intervalID));
+    // setInterval(() => {
+    //     if (!isPaused) {
+    //         window.scrollBy({
+    //             top: cardHeight * 2,
+    //             behavior: 'smooth',
+    //         })
+    //     }
+    // }, 1000)
 }
