@@ -102,8 +102,17 @@ let gallery = new SimpleLightbox('.gallery a');
 
 refs.form.addEventListener("submit", onFormSubmit);
 refs.loadMoreBtn.addEventListener("click", onLoadMoreBtnClick);
-// refs.gallery.addEventListener("click", clearInterval(intervalID))
-// window.addEventListener("scroll", throttle(scrollBy, 500));
+
+// это бесконечный скролл
+window.addEventListener("scroll", () => {
+    // document.documentElement - Это весь html,а getBoundingClientRect() - выводит координаты, 
+    // bottom показывает нижние координаты 
+    const documentRect = document.documentElement.getBoundingClientRect();
+    // document.documentElement.clientHeight - высота окна + 150px? что бы не ждать самого конца
+    if (documentRect.bottom < document.documentElement.clientHeight + 150) {
+        onLoadMoreBtnClick();
+    }
+});
 
 function onFormSubmit(event) {
     event.preventDefault();
